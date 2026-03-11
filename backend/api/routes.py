@@ -3,6 +3,7 @@ import pandas as pd
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, BackgroundTasks
 from typing import Optional
 import json
+import markdown
 
 from api.schemas import AnalysisResponse, HealthCheckResponse
 from services.analysis_service import analyze_dataframe
@@ -78,12 +79,14 @@ async def upload_and_analyze(
     if email:
         subject = "AI Data Analysis Report"
         
+        html_summary = markdown.markdown(ai_summary) if ai_summary else "N/A"
+        
         body = f"""
         <h3>Report Summary</h3>
         <hr/>
         <p>AI generated insights from your uploaded dataset: {file.filename}.</p>
         <p><strong>🤖 AI Summary:</strong></p>
-        <div>{ai_summary if ai_summary else "N/A"}</div>
+        <div>{html_summary}</div>
         <br/>
         
         <h3>Key Metrics</h3>
