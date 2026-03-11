@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routes import router as api_router
 from core.config import settings
 
-# Setup logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -17,7 +16,6 @@ app = FastAPI(
     description="API for parsing files, performing data analysis, and generating AI summaries."
 )
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,

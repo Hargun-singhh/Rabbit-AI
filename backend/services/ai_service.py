@@ -19,13 +19,18 @@ def generate_ai_summary(analysis_results: Dict[str, Any]) -> str:
         
     try:
         genai.configure(api_key=settings.GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-flash-latest')
         
         # We only send aggregated logic to the AI, NEVER the raw row data
         prompt = f"""
-        You are an expert data analyst. Based on the following statistical summary of a dataset, provide a concise, insightful natural language summary of the key findings. 
-        Highlight any interesting trends, dominant categories, or notable metrics.
-        Keep the response professional, clear, and easy to read.
+        You are an expert data analyst giving an executive briefing. Based on the following statistical summary of a dataset, provide a highly crisp, professional natural language summary of the key findings.
+        
+        CRITICAL INSTRUCTIONS for formatting:
+        1. Keep the insights very concise and actionable.
+        2. Format the response entirely in beautiful Markdown.
+        3. Use Markdown headings (e.g. ###) for distinct sections.
+        4. Use short bullet points for the metrics and trends.
+        5. DO NOT write long paragraphs. Make it easy to read at a glance.
 
         Dataset Aggregated Analysis (JSON structure):
         {json.dumps(analysis_results, indent=2)}

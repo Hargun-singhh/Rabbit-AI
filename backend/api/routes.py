@@ -1,6 +1,6 @@
 import io
 import pandas as pd
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, BackgroundTasks
 from typing import Optional
 import json
 
@@ -24,6 +24,7 @@ async def health_check():
 
 @router.post("/analyze", response_model=AnalysisResponse)
 async def upload_and_analyze(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     email: Optional[str] = Form(None)
 ):
@@ -75,20 +76,30 @@ async def upload_and_analyze(
     # Email Step
     email_sent = False
     if email:
-        subject = f"AI Data Analysis Report: {file.filename}"
+        subject = "AI Data Analysis Report"
         
-        report_lines = [
-            f"Here is your automated report for {file.filename}.",
-            "",
-            "📊 Data Summary:",
-            json.dumps(analysis_results['summary'], indent=2),
-            "",
-            "🤖 AI Summary:",
-            ai_summary if ai_summary else "N/A"
-        ]
+        body = f"""
+        <h3>Report Summary</h3>
+        <hr/>
+        <p>AI generated insights from your uploaded dataset: {file.filename}.</p>
+        <p><strong>🤖 AI Summary:</strong></p>
+        <div>{ai_summary if ai_summary else "N/A"}</div>
+        <br/>
         
-        body = "\n".join(report_lines)
-        email_sent = send_report_email(to_email=email, subject=subject, body=body)
+        <h3>Key Metrics</h3>
+        <hr/>
+        <ul>
+            <li><strong>Total Rows:</strong> {analysis_results['summary']['total_rows']}</li>
+            <li><strong>Total Columns:</strong> {analysis_results['summary']['total_columns']}</li>
+            <li><strong>Numeric Statistics Keys:</strong> {len(analysis_results.get('numeric_metrics', {}))}</li>
+            <li><strong>Categorical Top Values Keys:</strong> {len(analysis_results.get('categorical_metrics', {}))}</li>
+        </ul>
+        <br/>
+        <p>Thank you for using the AI Analysis System.</p>
+        """
+        
+        background_tasks.add_task(send_report_email, email, subject, body)
+        email_sent = True # assumed queued
 
     return AnalysisResponse(
         filename=file.filename,

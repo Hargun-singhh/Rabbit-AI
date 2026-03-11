@@ -7,12 +7,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - ENABLE_AI_SUMMARY=true
-      - EMAIL_SENDER=${EMAIL_SENDER}
-      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
-      - CORS_ORIGINS=["http://localhost:3000"]
+    env_file:
+      - .env
     volumes:
       - ./backend:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -26,5 +22,7 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
     volumes:
-      - ./frontend/src:/app/src
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
     command: npm run dev
