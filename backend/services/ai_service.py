@@ -21,6 +21,7 @@ def generate_ai_summary(analysis_results: Dict[str, Any]) -> str:
         genai.configure(api_key=settings.GEMINI_API_KEY)
         model = genai.GenerativeModel('gemini-flash-latest')
         
+        
         # We only send aggregated logic to the AI, NEVER the raw row data
         prompt = f"""
         You are an expert data analyst giving an executive briefing. Based on the following statistical summary of a dataset, provide a highly crisp, professional natural language summary of the key findings.
@@ -36,7 +37,10 @@ def generate_ai_summary(analysis_results: Dict[str, Any]) -> str:
         {json.dumps(analysis_results, indent=2)}
         """
         
-        response = model.generate_content(prompt)
+        response = model.generate_content(
+    prompt,
+    generation_config={"max_output_tokens": 200}
+)
         return response.text
     except Exception as e:
         logger.error(f"Error generating AI summary: {str(e)}")
