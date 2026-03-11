@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ENABLE_AI_SUMMARY=true
+      - EMAIL_SENDER=${EMAIL_SENDER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - CORS_ORIGINS=["http://localhost:3000"]
+    volumes:
+      - ./backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    volumes:
+      - ./frontend/src:/app/src
+    command: npm run dev
